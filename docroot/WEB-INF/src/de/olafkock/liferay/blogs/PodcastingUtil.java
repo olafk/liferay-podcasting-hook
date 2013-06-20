@@ -9,7 +9,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.expando.model.ExpandoColumn;
 import com.liferay.portlet.expando.model.ExpandoColumnConstants;
@@ -61,7 +60,7 @@ public class PodcastingUtil {
 		List<SyndEntry> syndEntries = new ArrayList<SyndEntry>();
 	
 		syndFeed.setEntries(syndEntries);
-	
+
 		for (BlogsEntry entry : blogsEntries) {
 			String author = HtmlUtil.escape(
 				PortalUtil.getUserName(entry.getUserId(), entry.getUserName()));
@@ -94,7 +93,7 @@ public class PodcastingUtil {
 	
 				value = StringUtil.shorten(
 					HtmlUtil.extractText(summary),
-					PropsValues.BLOGS_RSS_ABSTRACT_LENGTH, StringPool.BLANK);
+					200 /* PropsValues.BLOGS_RSS_ABSTRACT_LENGTH */, StringPool.BLANK);
 			}
 			else if (displayStyle.equals(RSSUtil.DISPLAY_STYLE_TITLE)) {
 				value = StringPool.BLANK;
