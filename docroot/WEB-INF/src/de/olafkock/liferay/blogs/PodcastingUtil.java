@@ -27,9 +27,12 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndEntryImpl;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
+import com.sun.syndication.feed.synd.SyndLink;
+import com.sun.syndication.feed.synd.SyndLinkImpl;
 import com.sun.syndication.io.FeedException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,49 +51,28 @@ public class PodcastingUtil {
 			String name, String description, String type, double version,
 			String displayStyle, String feedURL, String entryURL,
 			List<BlogsEntry> blogsEntries, ThemeDisplay themeDisplay)
-		throws SystemException, PortalException {
-	
-		SyndFeed syndFeed = new SyndFeedImpl();
-		
-		syndFeed.setFeedType(RSSUtil.getFeedType(type, version));
-		syndFeed.setTitle(name);
-		syndFeed.setLink(feedURL);
-		syndFeed.setDescription(description);
+		throws PortalException, SystemException {
 
+		SyndFeed syndFeed = new SyndFeedImpl();
+		syndFeed.setDescription(description);
 		List<SyndEntry> syndEntries = new ArrayList<SyndEntry>();
-	
 		syndFeed.setEntries(syndEntries);
 
 		for (BlogsEntry entry : blogsEntries) {
-			String author = HtmlUtil.escape(
-				PortalUtil.getUserName(entry.getUserId(), entry.getUserName()));
-	
-			StringBundler link = new StringBundler(4);
-	
-			if (entryURL.endsWith("/blogs/rss")) {
-				link.append(entryURL.substring(0, entryURL.length() - 3));
-				link.append(entry.getUrlTitle());
-			}
-			else {
-				link.append(entryURL);
-	
-				if (!entryURL.endsWith(StringPool.QUESTION)) {
-					link.append(StringPool.AMPERSAND);
-				}
-	
-				link.append("entryId=");
-				link.append(entry.getEntryId());
-			}
-	
+			SyndEntry syndEntry = new SyndEntryImpl();
+			String author = PortalUtil.getUserName(entry);
+			syndEntry.setAuthor(author);
+			SyndContent syndContent = new SyndContentImpl();
+			syndContent.setType(RSSUtil.ENTRY_TYPE_DEFAULT);
 			String value = null;
-	
+
 			if (displayStyle.equals(RSSUtil.DISPLAY_STYLE_ABSTRACT)) {
 				String summary = entry.getDescription();
-	
+
 				if (Validator.isNull(summary)) {
 					summary = entry.getContent();
 				}
-	
+
 				value = StringUtil.shorten(
 					HtmlUtil.extractText(summary),
 					200 /* PropsValues.BLOGS_RSS_ABSTRACT_LENGTH */, StringPool.BLANK);
@@ -109,41 +91,76 @@ public class PodcastingUtil {
 						"src=\"" + themeDisplay.getURLPortal() + "/"
 					});
 			}
-	
-			SyndEntry syndEntry = new SyndEntryImpl();
-	
-			syndEntry.setAuthor(author);
+
+			syndContent.setValue(value);
+			syndEntry.setDescription(syndContent);
+			StringBundler sb = new StringBundler(4);
+
+			if (entryURL.endsWith("/blogs/rss")) {
+				sb.append(entryURL.substring(0, entryURL.length() - 3));
+				sb.append(entry.getUrlTitle());
+			}
+			else {
+				sb.append(entryURL);
+
+				if (!entryURL.endsWith(StringPool.QUESTION)) {
+					sb.append(StringPool.AMPERSAND);
+				}
+
+				sb.append("entryId=");
+				sb.append(entry.getEntryId());
+			}
+
+			String link = sb.toString();
+
+			syndEntry.setLink(link);
+
+			syndEntry.setPublishedDate(entry.getDisplayDate());
 			syndEntry.setTitle(entry.getTitle());
-			syndEntry.setLink(link.toString());
-			syndEntry.setUri(syndEntry.getLink());
-			syndEntry.setPublishedDate(entry.getCreateDate());
 			syndEntry.setUpdatedDate(entry.getModifiedDate());
-	
+			syndEntry.setUri(link);
+			
 			SyndEnclosure enclosure = getEnclosure(entry.getCompanyId(), entry.getPrimaryKey());
 			if(enclosure != null) {
 				List<SyndEnclosure> enclosures = new LinkedList<SyndEnclosure>();
 				enclosures.add(enclosure);
 				syndEntry.setEnclosures(enclosures);
-				EntryInformation info = getItunesInfo(entry);
-				ArrayList<EntryInformation> modules = new ArrayList<EntryInformation>();
-				modules.add(info);
-				syndEntry.setModules(modules);
 			}
-			
-			SyndContent syndContent = new SyndContentImpl();
-	
-			syndContent.setType(RSSUtil.ENTRY_TYPE_DEFAULT);
-			syndContent.setValue(value);
-	
-			syndEntry.setDescription(syndContent);
-	
 			syndEntries.add(syndEntry);
 		}
-	
+		
+		syndFeed.setFeedType(RSSUtil.getFeedType(type, version));
+
+		List<SyndLink> syndLinks = new ArrayList<SyndLink>();
+
+		syndFeed.setLinks(syndLinks);
+
+		SyndLink selfSyndLink = new SyndLinkImpl();
+
+		syndLinks.add(selfSyndLink);
+
+		selfSyndLink.setHref(feedURL);
+		selfSyndLink.setRel("self");
+
+		if (feedURL.endsWith("/-/blogs/rss")) {
+			SyndLink alternateSyndLink = new SyndLinkImpl();
+
+			syndLinks.add(alternateSyndLink);
+
+			alternateSyndLink.setHref(
+				feedURL.substring(0, feedURL.length() - 12));
+			alternateSyndLink.setRel("alternate");
+		}
+
+		syndFeed.setPublishedDate(new Date());
+		syndFeed.setTitle(name);
+		syndFeed.setUri(feedURL);
+
 		try {
 			return RSSUtil.export(syndFeed);
 		}
 		catch (FeedException fe) {
+			fe.printStackTrace();
 			throw new SystemException(fe);
 		}
 	}
