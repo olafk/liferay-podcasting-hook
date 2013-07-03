@@ -164,17 +164,20 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 					</c:when>
 					<c:when test='<%= pageDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_FULL_CONTENT) || strutsAction.equals("/blogs/view_entry") %>'>
 						<%= entry.getContent() %>
-						<!-- assuming that all of the custom fields are enclosure-related, they all will not be shown -->
+						<!-- showing just the non-podcasting related custom fields. -->
 						<!-- this can be solved a lot more elegant after LPS-33455 has been fixed (see comment) -->
 						<!-- e.g. starting with 6.2 -->
 						<liferay-ui:custom-attributes-available className="<%= BlogsEntry.class.getName() %>"> <!-- ignoreAttributeNames="enclosure-url,enclosure-length,enclosure-type" -->
-						<span style="display:none">
+						<span nostyle="display:none">
+						<liferay-util:buffer var="tempCustomFieldMarkup">
 							<liferay-ui:custom-attribute-list
 								className="<%= BlogsEntry.class.getName() %>"
 								classPK="<%= entry.getEntryId() %>"
 								editable="<%= false %>"
 								label="<%= true %>"
 							/>
+						</liferay-util:buffer>
+						<%=cleanupCustomFields(tempCustomFieldMarkup) %>
 						</span>
 						<!-- However, we want to show an icon for the content... -->
 						<%=getIconMarkup(request, company.getPrimaryKey(), entry.getEntryId()) %>
@@ -332,4 +335,35 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 		}
 		return "";
 	}
+
+	private static final String token = "<div class=\"aui-field aui-field-wrapper\">";
+
+	/**
+	 * This code is manually copied from the class PseudoCodeForTest after the 
+	 * appropriate JUnit tests have turned green. See the remarks at that class
+	 * for reasons.
+	 */
+	public static String cleanupCustomFields(String markup) {
+		String[] tokens = markup.trim().split(token);
+		String result = "";
+		System.out.println(tokens.length);
+		// element 0 is an outer <div> element, ignore here
+		// last element contains closing </div> for outer element: Eliminate
+		int last = tokens.length-1;
+		tokens[last] = tokens[last].substring(0, tokens[last].length()-"</div>".length());
+
+		for(int i = 1; i < tokens.length; i++) {
+			if(tokens[i].contains("enclosure-type") || tokens[i].contains("enclosure-length") || tokens[i].contains("enclosure-url") || tokens[i].contains("itunes-duration") ) {
+				continue;
+			}
+			result += token + tokens[i];
+		}
+		if(result.length() > 0) {
+			result = "<div class=\"taglib-custom-attributes-list\">" + result + "</div>";
+		}
+		return result;
+	}
+
+
+
 %>

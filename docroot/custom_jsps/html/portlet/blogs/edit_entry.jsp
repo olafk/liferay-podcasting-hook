@@ -89,7 +89,7 @@ boolean allowTrackbacks = PropsValues.BLOGS_TRACKBACK_ENABLED && BeanParamUtil.g
 
 			<!-- assuming that all of the custom fields are enclosure-related -->
 			<!-- this can be solved a lot more elegant after LPS-33455 has been fixed -->
-			<liferay-ui:panel defaultState="closed" extended="<%= false %>" id="blogsEntryCustomFieldsPanel" persistState="<%= true %>" title="Enclosure">
+			<liferay-ui:panel defaultState="closed" extended="<%= false %>" id="blogsEntryCustomFieldsPanel" persistState="<%= true %>" title="Enclosure & Custom Fields">
 	
 				<liferay-ui:custom-attribute-list
 					className="<%= BlogsEntry.class.getName() %>"
