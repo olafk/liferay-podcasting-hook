@@ -24,7 +24,6 @@ public class ExtBlogStartup extends SimpleAction {
 	 */
 	public void run(String[] ids) throws ActionException {
 		try {
-			System.out.println("ExtBlog Startup - creating required expando attributes");
 			List<Company> companies = CompanyLocalServiceUtil.getCompanies();
 			for(Company company: companies) {
 				ExpandoTable table = ExtBlogUtil.getBlogExpandoTable(company.getCompanyId());

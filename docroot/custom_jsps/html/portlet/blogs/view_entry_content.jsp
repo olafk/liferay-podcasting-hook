@@ -168,7 +168,6 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 						<!-- this can be solved a lot more elegant after LPS-33455 has been fixed (see comment) -->
 						<!-- e.g. starting with 6.2 -->
 						<liferay-ui:custom-attributes-available className="<%= BlogsEntry.class.getName() %>"> <!-- ignoreAttributeNames="enclosure-url,enclosure-length,enclosure-type" -->
-						<span nostyle="display:none">
 						<liferay-util:buffer var="tempCustomFieldMarkup">
 							<liferay-ui:custom-attribute-list
 								className="<%= BlogsEntry.class.getName() %>"
@@ -178,7 +177,6 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view_entry_content.jsp
 							/>
 						</liferay-util:buffer>
 						<%=cleanupCustomFields(tempCustomFieldMarkup) %>
-						</span>
 						<!-- However, we want to show an icon for the content... -->
 						<%=getIconMarkup(request, company.getPrimaryKey(), entry.getEntryId()) %>
 						</liferay-ui:custom-attributes-available>
