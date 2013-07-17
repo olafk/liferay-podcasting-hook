@@ -1,0 +1,19 @@
+This application is a simple extension to the Blogs portlet
+and enables blogs to publish podcasts. 
+
+By entering Enclosure URL, length and type, these will be 
+displayed at the blog post and added embedded in the RSS 
+feed for the blog.
+
+This application utilized Custom Fields (Expandos). The 
+required Expando fields will be generated on startup.
+If you have more custom fields for Blog Entries, they will 
+be shown together with the podcast enclosure fields in the 
+order defined by Liferay's internal order of those fields. 
+The blog entry's "view" will show the custom fields that 
+it knows about in an abbreviated form, e.g. it comes with 
+an icon for enclosure type "audio/mpeg" that will be shown 
+as demonstrated in one of the screenshots.
+
+Olaf Kock
+www.olafkock.de
